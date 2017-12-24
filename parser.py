@@ -6,22 +6,14 @@ from scanner import *
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        MainWindow.resize(1000, 1000)
+        MainWindow.resize(1000, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
         MainWindow.setCentralWidget(self.centralwidget)
         MainWindow.setWindowTitle("Parse Tree")
-        MainWindow.setWindowIcon(QtGui.QIcon('parse.svg'))
-
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 500, 22))
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        MainWindow.setStatusBar(self.statusbar)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
 x = 10
-y = 10
+y = 100
 far_x = 10
 isDone = False
 
@@ -40,6 +32,8 @@ def draw_blocks(painter, text,details, isCircle):
 
 
 def tree_dfs(painter, prog_tree):
+
+
     global x, y, far_x
 
     text = prog_tree.cargo
@@ -47,10 +41,15 @@ def tree_dfs(painter, prog_tree):
     x = prog_tree.x
     y = prog_tree.y
 
-    # print(text+' x: '+str(x)+' y:'+str(y))
-    draw_blocks(painter, text,details, prog_tree.isCircle)
+    #print(text+' x: '+str(x)+' y:'+str(y))
+    if text != '':
+        draw_blocks(painter, text,details, prog_tree.isCircle)
+    else:
+
+        prog_tree.y -=60
     if len(prog_tree.children) > 0 and prog_tree.right is not None:
         for idx, ch in enumerate(prog_tree.children):
+
             ch.y = prog_tree.y + 50 + 10
 
             if idx == 0:
@@ -80,15 +79,18 @@ def tree_dfs(painter, prog_tree):
     elif len(prog_tree.children) > 0:
 
         for idx, ch in enumerate(prog_tree.children):
+
             ch.y = prog_tree.y+50+10
 
             if idx == 0:
                 ch.x = prog_tree.x
+
                 tree_dfs(painter, ch)
             else:
                 #y=y
                 far_x = far_x + 70 + 10
                 ch.x = far_x
+
                 tree_dfs(painter, ch)
 
             #draw lines
@@ -109,7 +111,7 @@ def tree_dfs(painter, prog_tree):
         tree_dfs(painter, prog_tree.right)
     if prog_tree.isFinalNode:
         x=10
-        y=10
+        y=100
         far_x=10
         return
 
@@ -123,7 +125,7 @@ class MyMainScreen(QMainWindow):
 
     def paintEvent(self, event):
 
-        global main_painter
+
         painter = QtGui.QPainter(self)
         painter.setPen(QtGui.QPen(QtCore.Qt.black))
         mark_last_node(program_tree_final)
@@ -140,7 +142,7 @@ class Tree:
         self.children = []
         self.right = right
         self.x = 10
-        self.y = 10
+        self.y = 100
         self.isFinalNode = False  # To mark last node
         self.isCircle = True
 
@@ -181,7 +183,11 @@ def print_tree_indented(tree, level=0):
     if tree is None:
         return
 
-    print('  ' * level + str(tree.cargo))
+    if tree is str:
+        print("error")
+    else:
+        print('  ' * level + str(tree.cargo))
+
     print_list_indented(tree.children, level + 1)
     print_tree_indented(tree.right, level )
 
@@ -201,6 +207,9 @@ def advance():
 
 
 def match(token_type):
+    if token_type==18:
+        var='hi'
+        print(var)
     global current_token, tokens_pointer
     if token_type == 'number':
         if current_token.isnumeric():
@@ -268,12 +277,15 @@ def statement():
 def factor():
     factor_tree=Tree()
     if current_token == '(':
-        factor_tree.add_data('(')
+        factor_tree_left = Tree(cargo='(')
         match('(')
-        factor_tree_right = exp()
+        factor_tree.add_child(factor_tree_left)
+        factor_tree_middle = exp()
+        factor_tree.add_child(factor_tree_middle)
+        factor_tree_right = Tree(cargo=')')
         match(')')
-        factor_tree_right.add_right(')')
-        factor_tree.add_right(factor_tree_right)
+        factor_tree.add_child(factor_tree_right)
+
     else:
         if current_token.isnumeric():
             factor_tree.add_data('const')
@@ -291,6 +303,7 @@ def factor():
 def term():
     isRecursive = False
     term_tree_ch0 = factor()
+
     new_term_tree = Tree()
     while current_token == '*' or current_token == '/':
         isRecursive = True
@@ -424,6 +437,7 @@ def assign_stmt():
 #           ('0', 'number'), (';', 'special symbol'), ('write', 'reserved word'), ('fact', 'identifier'),
 #           ('end', 'reserved word')]
 tokens = scanner_tokens
+print(tokens)
 tokens_pointer = 0
 current_token = tokens[tokens_pointer][0]
 outFile = 'parser_output.txt'
@@ -431,6 +445,7 @@ outFile = 'parser_output.txt'
 
 with open(outFile, 'w')as output_file:
     program_tree_final = program() # generate tree of the program
+
 
     if __name__ == "__main__":
         app = QApplication(sys.argv)

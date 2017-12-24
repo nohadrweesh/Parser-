@@ -22,6 +22,10 @@ x  :identifier
 x  :identifier
 -  :special symbol
 1  :number
+;  :special symbol
+x  :identifier
+:=  :special symbol
+1  :number
 until  :reserved word
 x  :identifier
 =  :special symbol
