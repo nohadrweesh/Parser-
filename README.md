@@ -1,11 +1,11 @@
 # Parser Project
-========================
+====================
 ### It's a python project with PyQt
 
 #### It uses python 3.6 and PyQt5 
 
 #### This project can generate parse tree of any code in tiny language 
-#### It has sepearate module for the scanner
+#### It has separate module for the scanner
 #### It also commit  finding statements by writing to a file 
 
 ## This screenshot shows the tree generated for a specific code
